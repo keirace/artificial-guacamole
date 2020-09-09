@@ -9,8 +9,7 @@ from transform import four_point_transform
 # automatically determine the coordinates without pre-supplying them
 close = False
 vid = cv2.VideoCapture("zoom_0.mp4")
-pics = []
-edge = []
+
 while True:
     b, frame = vid.read()
     if b:
@@ -19,8 +18,6 @@ while True:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.bilateralFilter(gray, 11, 17, 17)
         edged = cv2.Canny(gray, 30, 200)
-        edge.append(edged)
-        pics.append(frame)
 
         # find contours in the edged image, keep only the largest
         # ones, and initialize our screen contour
