@@ -53,7 +53,7 @@ while True:
         # display warped images
         cv2.imshow("Warped", warped)
         key = cv2.waitKey(1)
-        cv2.imwrite('frames\\' + str(i) + ".jpg", warped)
+        # cv2.imwrite('frames\\' + str(i) + ".jpg", warped)
         i += 1
         if key & 0xFF == ord('q') or cv2.getWindowProperty("Video", 0) \
                 or cv2.getWindowProperty("Edged", 0) == -1:
