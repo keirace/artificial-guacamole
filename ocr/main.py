@@ -9,6 +9,7 @@ from transform import four_point_transform
 # automatically determine the coordinates without pre-supplying them
 close = False
 vid = cv2.VideoCapture("zoom_0.mp4")
+i = 0
 
 while True:
     b, frame = vid.read()
@@ -21,12 +22,12 @@ while True:
 
         # find contours in the edged image, keep only the largest
         # ones, and initialize our screen contour
-        cnts = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:10]
+        contours = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = imutils.grab_contours(contours)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
         screenCnt = None
 
-        for c in cnts:
+        for c in contours:
             # approximate the contour
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.015 * peri, True)
@@ -35,21 +36,29 @@ while True:
                 screenCnt = approx
                 break
 
-        pts = np.array(eval("[(132, 220), (205, 215), (215, 265), (135, 275)]"), dtype="float32")
         # apply the four point transform to obtain a "birds eye view" of
         # the image
-        if b is not False:
-            warped = four_point_transform(frame, pts)
-        # show the original and warped images
+        warped = four_point_transform(gray, screenCnt.reshape(4, 2))
+
+        # threshold it to give it 'black and white' paper effect
+        thresh = cv2.threshold(warped, 0, 255,
+                               cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 5))
+        warped = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+
         cv2.imshow("Edged", edged)
         cv2.drawContours(frame, [screenCnt], -1, (0, 255, 0), 3)
-
+        # display original images
         cv2.imshow("Video", frame)
+        # display warped images
         cv2.imshow("Warped", warped)
         key = cv2.waitKey(1)
+        cv2.imwrite('frames\\' + str(i) + ".jpg", warped)
+        i += 1
         if key & 0xFF == ord('q') or cv2.getWindowProperty("Video", 0) \
                 or cv2.getWindowProperty("Edged", 0) == -1:
             close = True
             break
-        if close:
-            break
+    else: break
+    if close:
+        break
