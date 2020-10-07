@@ -14,7 +14,7 @@ i = 0
 while True:
     b, frame = vid.read()
     if b:
-        width, height, _ = frame.shape
+        height = frame.shape[1]
         frame = frame[0:int(height / 1.5), :]
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.bilateralFilter(gray, 11, 17, 17)
@@ -46,6 +46,9 @@ while True:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 5))
         warped = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
+        # crop the rightmost side out and get only the numbers
+        width = warped.shape[1]
+        warped = warped[:, 0:int(width/1.3)]
         cv2.imshow("Edged", edged)
         cv2.drawContours(frame, [screenCnt], -1, (0, 255, 0), 3)
         # display original images
@@ -53,7 +56,7 @@ while True:
         # display warped images
         cv2.imshow("Warped", warped)
         key = cv2.waitKey(1)
-        # cv2.imwrite('frames\\' + str(i) + ".jpg", warped)
+        cv2.imwrite('frames\\set 2\\' + str(i) + ".jpg", warped)
         i += 1
         if key & 0xFF == ord('q') or cv2.getWindowProperty("Video", 0) \
                 or cv2.getWindowProperty("Edged", 0) == -1:
